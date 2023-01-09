@@ -1,0 +1,161 @@
+.validators {
+  position: relative;
+  width: 100%;
+}
+
+.validators__navigation {
+  width: 100%;
+  margin: 0 0 20px 0;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  grid-column-gap: 12px;
+}
+
+.validators__switcher {
+  grid-column-start: 1;
+  grid-column-end: 3;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+}
+
+.validators__switcher-button{
+  width: 50%;
+  height: 100%;
+  background-color: transparent;
+  border: none;
+  font-weight: 600;
+  font-size: 16px;
+  color: $color-background;
+  background-color: rgba($color-main, 0.4);
+  outline: none;
+  cursor: pointer;
+
+  &:first-child {
+    border-radius: 8px 0 0 8px;
+  }
+
+  &:last-child {
+    border-radius: 0 8px 8px 0;
+  }
+
+  &_selected {
+    color: $white;
+    background-color: rgba($color-main, 0.6);
+  }
+}
+
+.validators__find {
+  grid-column-start: 5;
+  grid-column-end: 9;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  grid-column-gap: 12px;
+  width: 100%;
+}
+
+.validators__find-input {
+  grid-column-start: 1;
+  grid-column-end: 4;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  padding: 0 12px 0 12px;
+  border: 2px solid rgba($color-main, 0.6);
+  border-radius: 8px;
+  outline: none;
+  background-color: $white;
+  font-weight: 400;
+  font-size: 16px;
+  color: $gray-darker;
+  text-align: center;
+
+  &::placeholder {
+    font-weight: 300;
+    color: $gray-light;
+  }
+}
+
+.validators__find-button {
+  grid-column-start: 4;
+  grid-column-end: 5;
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 40px;
+  border: none;
+  border-radius: 8px;
+  outline: none;
+  background-color: rgba($color-main, 0.6);
+  font-weight: 600;
+  font-size: 16px;
+  color: $white;
+  cursor: pointer;
+}
+
+.validators__table {
+  width: 100%;
+  display: flex;
+  margin: 0 0 60px 0;
+  flex-direction: column;
+  align-items: center;
+}
+
+.validators__rows {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.validators__scroll-buttons {
+  position: fixed;
+  bottom: 68px;
+  right: 60px;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.validators__scroll-button {
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: rgba($color-main, 0.5);
+  transition: linear 0.2s;
+  cursor: pointer;
+
+  &:first-child {
+    border-radius: 8px 8px 0 0;
+    border-bottom: 2px solid $color-background;
+  }
+
+  &:last-child {
+    border-radius: 0 0 8px 8px;
+  }
+
+  &:hover {
+    background-color: rgba($color-main, 0.6);
+  }
+}
+
+.validators__top-arrow {
+  position: relative;
+  top: 2px;
+  width: 8px;
+  height: 8px;
+  border-top: 4px solid $color-background;
+  border-left: 4px solid $color-background;
+  transform: rotate(45deg);
+}
+
+.validators__bottom-arrow {
+  position: relative;
+  top: -2px;
+  width: 8px;
+  height: 8px;
+  border-top: 4px solid $color-background;
+  border-left: 4px solid $color-background;
+  transform: rotate(225deg);
+}
