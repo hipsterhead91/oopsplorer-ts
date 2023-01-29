@@ -1,25 +1,98 @@
+// Статьи на тему настройки tsconfig.json::
+// Часть 1: https://habr.com/ru/post/542234/
+// Часть 2: https://habr.com/ru/post/557738/
 {
   "compilerOptions": {
-    "target": "es5",
+
+    // Определяет, в какую версию стандарта ECMAScript будет скомпилирован код (по умолчанию стоял ES5).
+    "target": "ES6",
+
+    // Подключает дополнительные тайпинги в зависимости от выбранной в target спецификации.
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "ES6", // ES6 я подключил сам, по умолчанию его не было (вообще не уверен, нужен ли он, и не включает ли его в себя esnext).
+      "esnext",
+      "ScriptHost" // честно, не уверен зачем я подключил ScriptHost, но так было в статье.
     ],
+    
+    // Определяет, будет ли компилятор обрабатывать только .ts файлы, или .js тоже.
     "allowJs": true,
+
+    // Официальная дока: https://www.typescriptlang.org/tsconfig#skipLibCheck
     "skipLibCheck": true,
+
+    // Позволяет импортировать CommonJS пакеты как ES6.
     "esModuleInterop": true,
+
+    // Читай здесь: https://habr.com/ru/post/542234/
     "allowSyntheticDefaultImports": true,
-    "strict": true,
+
+    // Цитата из статьи:
+    // "Устанавливая strict: true, нет наглядного представления, какие именно проверки включены и какие опции вообще существуют. Для проектов, которые
+    // с самого начала пишутся на TypeScript это не так принципиально, как для проектов, которые поэтапно портируются с JavaScript. Лично я предпочитаю
+    // указывать список флагов явным образом". Решил поступить так же, для чего закомментил strict и явно прописал все входящие в него опции.
+
+    // Фактически, "пакетно" включает основной функционал TypeScript; вместо этого можно настроить все свойства вручную.
+    // "strict": true,
+
+    // Определяет строгость не TypeScript, а JavaScript, т.е. отвечает за правило "use strict".
+    "alwaysStrict": true,
+
+    // Включение этого флага обязует нас явно прописывать тип any, если мы хотим его использовать.
+    "noImplicitAny": true,
+
+    // Если false, то мы можем передавать значения null и undefined туда, где ожидаются другие типы, 
+    // например number или string, если true - то не можем, и придётся явно прописывать null/undefined как возможный тип.
+    "strictNullChecks": true,
+
+    // Следит, чтобы объявленные свойства класса всегда были инициализированы.
+    "strictPropertyInitialization": true,
+
+    // Читай здесь: https://habr.com/ru/post/557738/
+    "strictFunctionTypes": true,
+    
+    // При использовании this проверяет, что контекст выполнения известен.
+    "noImplicitThis": true,
+
+    // Включает более строгую проверку сигнатур при использовании соответствующих методов: bind, call, apply.
+    "strictBindCallApply": true,
+
+    // Включает режим чувствительности к регистру (case-sensitive) для импорта файлов.
     "forceConsistentCasingInFileNames": true,
+
+    // Читай здесь: https://habr.com/ru/post/557738/
+    "noPropertyAccessFromIndexSignature": true, // добавил эту опцию сам, по умолчанию её не было.
+
+    // Читай здесь: https://habr.com/ru/post/557738/
+    "noUncheckedIndexedAccess": false,
+
+    // Флаг проверяет, чтобы все логические ветки функции возвращали значение.
+    "noImplicitReturns": true,
+
+    // Проверяет наличие break в операторе switch/case.
     "noFallthroughCasesInSwitch": true,
-    "module": "esnext",
+
+    // Читай здесь: https://habr.com/ru/post/542234/
+    "module": "ES6",
+
+    // Поддерживает только два значения, "node" и "classic", но второе нам не нужно в 99% случаев, поэтому просто забей. 
     "moduleResolution": "node",
+
+    // Позволяет импортировать .json файлы.
     "resolveJsonModule": true,
+
+    // Официальная дока: https://www.typescriptlang.org/tsconfig#isolatedModules
     "isolatedModules": true,
+
+    // Официальная дока: https://www.typescriptlang.org/tsconfig#noEmit
     "noEmit": true,
+
+    // Включает поддержку jsx для проектов на React. Есть несколько типов значений (https://habr.com/ru/post/542234/),
+    // но по умолчанию было "react-jsx" - я решил не менять.
     "jsx": "react-jsx"
   },
+
   "include": [
     "src"
   ]
