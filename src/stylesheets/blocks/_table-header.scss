@@ -1,0 +1,154 @@
+.table-header {
+  width: 100%;
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  background-color: rgba($color-main, 0.6);
+  border-radius: 8px 8px 0 0;
+
+  @media (max-width: 992px) {
+    min-height: 56px;
+  }
+
+  @media (max-width: 480px) {
+    min-height: 50px;
+  }
+}
+
+.table-header__cell {
+  box-sizing: border-box;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+#th-validator {
+  grid-column: 1/5;
+  box-sizing: border-box;
+
+  @media (max-width: 576px) {
+    grid-column: 1/6;
+  }
+
+  @media (max-width: 480px) {
+    grid-column: 1/9;
+  }
+}
+
+#th-power {
+  grid-column: 5/7;
+  justify-content: end;
+
+  @media (max-width: 576px) {
+    grid-column: 6/9;
+  }
+
+  @media (max-width: 480px) {
+    display: none;
+  }
+}
+
+#th-commission {
+  grid-column: 7/9;
+  justify-content: end;
+
+  @media (max-width: 576px) {
+    display: none;
+  }
+}
+
+.table-header__sort-button {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+}
+
+#srt-validator {
+  margin: 0 0 0 32px;
+
+  @media (max-width: 768px) {
+    margin: 0 0 0 24px;
+  }
+}
+
+#srt-power {
+  margin: 0 34px 0 0px;
+
+  @media (max-width: 768px) {
+    margin: 0 26px 0 0px;
+  }
+}
+
+#srt-commission {
+  margin: 0 32px 0 0;
+
+  @media (max-width: 768px) {
+    margin: 0 24px 0 0;
+  }
+}
+
+.table-header__sort-icon {
+  position: relative;
+  width: 8px;
+  height: 8px;
+  margin: 0 6px 0 0;
+  display: flex;
+  flex-direction: column;
+    
+  span {
+    position: absolute;
+    box-sizing: border-box;
+    width: 6px;
+    height: 6px;
+    transform: rotate(45deg);
+
+    &:first-child {
+      top: -1px;
+      border-left: 2px solid $color-background;
+      border-top: 2px solid $color-background;
+    }
+
+    &:last-child {
+      bottom: -1px;
+      border-right: 2px solid $color-background;
+      border-bottom: 2px solid $color-background;
+    }
+  }
+
+  &_asc {
+    span {
+      &:first-child {
+        border-left: 2px solid $color-main;
+        border-top: 2px solid $color-main;
+      }
+      &:last-child {
+        border-right: 2px solid $color-second;
+        border-bottom: 2px solid $color-second;
+      }
+    }
+  }
+
+  &_dsc {
+    span {
+      &:first-child {
+        border-left: 2px solid $color-second;
+        border-top: 2px solid $color-second;
+      }
+      &:last-child {
+        border-right: 2px solid $color-main;
+        border-bottom: 2px solid $color-main;
+      }
+    }
+  }
+}
+
+
+.table-header__column-name {
+  font-weight: 600;
+  font-size: 16px;
+  color: $color-background;
+
+  @media (max-width: 992px) {
+    font-size: 14px;
+  }
+}
