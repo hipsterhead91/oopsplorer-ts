@@ -1,13 +1,20 @@
+// Пакеты
 import { Link } from "react-router-dom";
-import { cutDecimals, tweakCommission } from "../utils/formatting";
+
+// Типизация
 import ITableRowProps from "../interfaces/ITableRowProps";
+
+// Мой код
+import { cutDecimals, tweakCommission } from "../utils/formatting";
+
+
 
 function TableRow(props: ITableRowProps) {
 
   const validator = props.validator;
-  const chain = props.chain;
-  const network = chain.isMain ? 'mainnet' : 'testnet';
-  const chainPath = chain.path + '-' + network;
+  const currentChain = props.currentChain;
+  const network = currentChain.isMain ? 'mainnet' : 'testnet';
+  const chainPath = currentChain.path + '-' + network;
 
   // РЕНДЕР АВАТАРА
   const avatarUrl = (validator.avatar) ? validator.avatar : `${process.env["PUBLIC_URL"]}/images/no-avatar.png`;
@@ -37,8 +44,8 @@ function TableRow(props: ITableRowProps) {
   const highCommissionStyle = (Number(validator.commission.commission_rates.rate) > 0.1) ? 'table-row__warning' : 'table-row__warning_hidden';
 
   // РЕНДЕР ВЕСА ГОЛОСА
-  const stake = Number(cutDecimals(validator.tokens, chain.decimals)).toLocaleString('en');
-  const symbol = chain.symbol;
+  const stake = Number(cutDecimals(validator.tokens, currentChain.decimals)).toLocaleString('en');
+  const symbol = currentChain.symbol;
   const votingPower = validator.voting_power + '%';
 
   // РЕНДЕР КОМИССИИ

@@ -1,17 +1,21 @@
+// Пакеты
 import { Outlet } from "react-router-dom";
+
+// Компоненты
 import Header from "./Header";
 import Footer from "./Footer";
-import ILayoutProps from "../interfaces/ILayoutProps";
 
-function Layout(props: ILayoutProps) {
+
+
+function Layout() {
 
   return (
     <div className="app__container">
 
-      <Header setCurrentChain={props.setCurrentChain} />
+      <Header />
 
       <main className="app__main">
-        <Outlet context={[props.setCurrentChain]} />
+        <Outlet />
       </main>
 
       <Footer />

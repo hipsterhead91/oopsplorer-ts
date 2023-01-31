@@ -1,15 +1,25 @@
+// Пакеты
 import { useContext, useRef } from 'react';
 import { Link, NavLink } from "react-router-dom";
-import { chains } from '../chains/chains';
-import CurrentChainContext from '../contexts/CurrentChainContext';
-import { getPath } from '../utils/formatting';
-import IHeaderProps from '../interfaces/IHeaderProps';
+
+// Контексты
+import AppComponentContext from '../contexts/AppComponentContext';
+
+// Типизация
 import IChain from '../interfaces/IChain';
 import INavLink from '../interfaces/INavLink';
 
-function Header(props: IHeaderProps) {
+// Мой код
+import { chains } from '../chains/chains';
+import { getPath } from '../utils/formatting';
 
-  const currentChain = useContext(CurrentChainContext);
+
+
+function Header() {
+
+  const currentChain = useContext(AppComponentContext).currentChain;
+  const setCurrentChain = useContext(AppComponentContext).setCurrentChain;
+
   // Если я всё правильно понял, при использовании хука useRef нужно указывать тип элемента,
   // который ему присваивается, и null как "стартовый" тип, поскольку ref инициализируется
   // ДО рендера, т.е. тогда, когда искомого элемента ещё нет. При этом, обращаясь к элементу
@@ -32,7 +42,7 @@ function Header(props: IHeaderProps) {
   };
 
   const switchChain = (chain: IChain | null) => {
-    props.setCurrentChain(chain);
+    setCurrentChain(chain);
     hideChainList();
     window.scrollTo(0, 0); // прокрутка страницы наверх
   }

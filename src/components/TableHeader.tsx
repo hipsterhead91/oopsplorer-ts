@@ -1,9 +1,14 @@
+// Пакеты
 import { useState, useRef, useEffect } from "react";
+
+// Типизация
 import ITableHeaderProps from "../interfaces/ITableHeaderProps";
+
+
 
 function TableHeader(props: ITableHeaderProps) {
 
-  const chain = props.chain;
+  const currentChain = props.currentChain;
   const isCurrentSetActive = props.isCurrentSetActive;
   const shownValidators = props.shownValidators;
   const setShownValidators = props.setShownValidators;
@@ -35,7 +40,7 @@ function TableHeader(props: ITableHeaderProps) {
   // СБРОС СОРТИРОВКИ ПРИ СМЕНЕ СЕТИ
   useEffect(() => {
     resetIconStyles();
-  }, [chain])
+  }, [currentChain])
 
   useEffect(() => {
     resetIconStyles();

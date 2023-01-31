@@ -1,22 +1,34 @@
-import { useState, useEffect } from "react";
-import { useParams, useOutletContext, Link, useNavigate } from "react-router-dom";
-import { cutDecimals, tweakCommission, getPath } from "../utils/formatting";
+// Пакеты
+import { useState, useEffect, useContext } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
+
+// Контексты
+import AppComponentContext from "../contexts/AppComponentContext";
+import ValidatorsComponentContext from "../contexts/ValidatorsComponentContext";
+
+// Типизация
 import IValidator from "../interfaces/IValidator";
+
+// Мой код
+import { cutDecimals, tweakCommission, getPath } from "../utils/formatting";
+
+
 
 function Validator() {
 
   const currentValoper = useParams()["valoper"]; // из ссылки в браузерной строке получаем адрес текущего валидатора
-  const [chain, allValidators] = useOutletContext();
+  const currentChain = useContext(AppComponentContext).currentChain;
+  const allValidators = useContext(ValidatorsComponentContext).allValidators;
   const [validator, setValidator] = useState<IValidator | null>();
-  const network = chain.isMain ? 'mainnet' : 'testnet';
-  const chainPath = chain.path + '-' + network;
+  const network = currentChain.isMain ? 'mainnet' : 'testnet';
+  const chainPath = currentChain.path + '-' + network;
   const navigate = useNavigate();
 
   // ПОЛУЧАЕМ ОБЪЕКТ ТЕКУЩЕГО ВАЛИДАТОРА
   useEffect(() => {
-    const validator = allValidators.find((val: { operator_address: string })=> val.operator_address === currentValoper);
+    const validator = allValidators.find((val: { operator_address: string }) => val.operator_address === currentValoper);
     setValidator(validator);
-  }, [chain, allValidators, currentValoper])
+  }, [currentChain, allValidators, currentValoper])
 
   let [rank, moniker, valoper, activity, activityStyle, bond, bondStyle, jail, jailStyle, highCommission, highCommissionStyle, stake, symbol, votingPower, commission, securityContact, details] = '';
   // Примечание: как я понял, для аватара нужно указать undefined как возможный тип, т.к. далее происходит обращение к файловой
@@ -24,12 +36,12 @@ function Validator() {
   let avatar: string | undefined;
   let website = <p />;
 
-  if (validator === undefined) {
+  if (!validator) {
     avatar = `${process.env["PUBLIC_URL"]}/images/no-avatar.png`;
     rank = '#000';
     moniker = "Validator Doesn't Exist";
-    valoper = 'no validator operator address';
-    activity = 'Inactive';
+    valoper = 'no such validator operator address';
+    activity = '';
     activityStyle = 'validators__activity validators__activity_inactive';
     stake = '—';
     votingPower = '—';
@@ -39,7 +51,7 @@ function Validator() {
     details = '—';
   }
 
-  else if (validator) {
+  else if (validator && currentChain) {
 
     // РЕНДЕР АВАТАРА
     avatar = (validator.avatar === '') ? `${process.env["PUBLIC_URL"]}/images/no-avatar.png` : validator.avatar;
@@ -71,8 +83,8 @@ function Validator() {
     highCommissionStyle = (Number(validator.commission.commission_rates.rate) > 0.1) ? 'validator__warning' : 'validator__warning_hidden';
 
     // РЕНДЕР СТЕЙКА
-    stake = Number(cutDecimals(validator.tokens, chain.decimals)).toLocaleString('en');
-    symbol = chain.symbol;
+    stake = Number(cutDecimals(validator.tokens, currentChain.decimals)).toLocaleString('en');
+    symbol = currentChain.symbol;
 
     // РЕНДЕР ВЕСА ГОЛОСА
     votingPower = validator.voting_power + '%';
@@ -94,8 +106,10 @@ function Validator() {
 
   // ЗАКРЫВАЕМ ОКНО ПО КЛИКУ НА ОВЕРЛЕЙ
   const closeWindow = () => {
-    const path = getPath(chain);
-    navigate(`/${path}/validators`);
+    if (currentChain) {
+      const path = getPath(currentChain);
+      navigate(`/${path}/validators`);
+    }
   }
 
   return (

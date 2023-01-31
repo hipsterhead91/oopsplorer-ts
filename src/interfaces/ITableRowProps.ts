@@ -3,7 +3,7 @@ import IChain from "./IChain";
 
 interface ITableRowProps {
   validator: IValidator,
-  chain: IChain
+  currentChain: IChain
 }
 
 export default ITableRowProps;

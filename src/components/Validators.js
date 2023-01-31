@@ -1,13 +1,27 @@
-import { useState, useEffect, useRef } from "react";
-import { useOutletContext, Outlet } from "react-router-dom";
-import getAvatarsData from "../api/getAvatarsData";
-import { sortByTokens, addRanks, addVotingPower, addAvatars, filterActive, filterInactive } from "../utils/formatting";
+// Пакеты
+import { useState, useEffect, useRef, useContext } from "react";
+import { Outlet } from "react-router";
+
+// Компоненты
 import TableRow from "./TableRow";
 import TableHeader from "./TableHeader";
 
+// Контексты
+import ChainComponentContext from "../contexts/ChainComponentContext";
+import ValidatorsComponentContext from "../contexts/ValidatorsComponentContext";
+import AppComponentContext from "../contexts/AppComponentContext";
+
+// Мой код
+import getAvatarsData from "../api/getAvatarsData";
+import { sortByTokens, addRanks, addVotingPower, addAvatars, filterActive, filterInactive } from "../utils/formatting";
+
+
+
 function Validators() {
 
-  const [chain, chainApi, totalBonded, activeProposals] = useOutletContext();
+  const currentChain = useContext(AppComponentContext).currentChain;
+  const chainApi = useContext(ChainComponentContext).chainApi;
+  const totalBonded = useContext(ChainComponentContext).totalBonded;
   const [isCurrentSetActive, setIsCurrentSetActive] = useState(true);
   const [avatarsData, setAvatarsData] = useState([]);
   const [allValidators, setAllValidators] = useState([]);
@@ -19,9 +33,9 @@ function Validators() {
 
   // ПОЛУЧАЕМ АВАТАРЫ В МАССИВЕ ОБЪЕКТОВ
   useEffect(() => {
-    getAvatarsData(chain)
-      .then(result => setAvatarsData(result))
-  }, [chain])
+    getAvatarsData(currentChain)
+      .then(result => {setAvatarsData(result)})
+  }, [currentChain])
 
   // ПОЛУЧАЕМ ВАЛИДАТОРОВ, СОРТИРУЕМ И ДОБАВЛЯЕМ ПОЛЯ
   useEffect(() => {
@@ -41,7 +55,7 @@ function Validators() {
         setActiveValidators(active);
         setInactiveValidators(inactive);
       })
-  }, [chain, totalBonded, avatarsData]);
+  }, [currentChain, totalBonded, avatarsData]);
 
   // РЕНДЕРИМ АКТИВНЫХ ВАЛИДАТОРОВ КОГДА ОНИ ПОЛУЧЕНЫ
   useEffect(() => {
@@ -52,12 +66,12 @@ function Validators() {
   // СБРАСЫВАЕМ НАСТРОЙКИ ПРИ ПЕРЕКЛЮЧЕНИИ СЕТИ
   useEffect(() => {
     setIsCurrentSetActive(true);
-  }, [chain])
+  }, [currentChain])
 
   // СБРАСЫВАЕМ ИНПУТ ФИЛЬТРА ВАЛИДАТОРОВ
   useEffect(() => {
     filterInput.current.value = '';
-  }, [chain, isCurrentSetActive])
+  }, [currentChain, isCurrentSetActive])
 
   // ПЕРЕКЛЮЧАЕМСЯ НА АКТИВНЫЙ СЕТ
   const switchToActive = () => {
@@ -72,7 +86,7 @@ function Validators() {
     setShownValidatorsBackup(inactiveValidators);
     setIsCurrentSetActive(false);
   }
-  
+
   // СКРОЛЛИМ СТРАНИЦУ ВВЕРХ
   const scrollToTop = () => {
     window.scrollTo({
@@ -106,36 +120,38 @@ function Validators() {
   const inactiveButtonStyle = isCurrentSetActive ? "validators__switcher-button" : "validators__switcher-button validators__switcher-button_selected"
 
   return (
-    <div className="validators">
-      <Outlet context={[chain, allValidators]} />
-      <div className="validators__navigation">
-        <div className="validators__switcher">
-          <button onClick={switchToActive} className={activeButtonStyle}>Active</button>
-          <button onClick={switchToInactive} className={inactiveButtonStyle}>Inactive</button>
+    <ValidatorsComponentContext.Provider value={{ allValidators }}>
+      <div className="validators">
+        <Outlet />
+        <div className="validators__navigation">
+          <div className="validators__switcher">
+            <button onClick={switchToActive} className={activeButtonStyle}>Active</button>
+            <button onClick={switchToInactive} className={inactiveButtonStyle}>Inactive</button>
+          </div>
+          <div className="validators__find">
+            <input ref={filterInput} onChange={event => filterByMoniker(event)} className="validators__find-input" type="text" placeholder="Search by moniker"></input>
+            <button onClick={clearFilter} className="validators__find-button">Clear</button>
+          </div>
         </div>
-        <div className="validators__find">
-          <input ref={filterInput} onChange={event => filterByMoniker(event)} className="validators__find-input" type="text" placeholder="Search by moniker"></input>
-          <button onClick={clearFilter} className="validators__find-button">Clear</button>
+        <div className="validators__table">
+          <TableHeader shownValidators={shownValidators} setShownValidators={setShownValidators} currentChain={currentChain} isCurrentSetActive={isCurrentSetActive} />
+          <div className="validators__rows">
+            {shownValidators.map(validator => {
+              return <TableRow key={validator.operator_address} validator={validator} currentChain={currentChain} />
+            })}
+          </div>
         </div>
-      </div>
-      <div className="validators__table">
-        <TableHeader shownValidators={shownValidators} setShownValidators={setShownValidators} chain={chain} isCurrentSetActive={isCurrentSetActive} />
-        <div className="validators__rows">
-          {shownValidators.map(validator => {
-            return <TableRow key={validator.operator_address} validator={validator} chain={chain} />
-          })}
-        </div>
-      </div>
 
-      <div className="validators__scroll-buttons">
-        <div onClick={scrollToTop} className="validators__scroll-button">
-          <div className="validators__top-arrow"></div>
-        </div>
-        <div onClick={scrollToBottom} className="validators__scroll-button">
-          <div className="validators__bottom-arrow"></div>
+        <div className="validators__scroll-buttons">
+          <div onClick={scrollToTop} className="validators__scroll-button">
+            <div className="validators__top-arrow"></div>
+          </div>
+          <div onClick={scrollToBottom} className="validators__scroll-button">
+            <div className="validators__bottom-arrow"></div>
+          </div>
         </div>
       </div>
-    </div>
+    </ValidatorsComponentContext.Provider>
   )
 }
 

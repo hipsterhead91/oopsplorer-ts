@@ -1,4 +1,7 @@
+// Пакеты
 import { Link } from "react-router-dom";
+
+
 
 function NotFound() {
 

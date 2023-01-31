@@ -4,7 +4,7 @@ import IValidator from "./IValidator";
 interface ITableHeaderProps {
   shownValidators: IValidator[],
   setShownValidators: React.Dispatch<React.SetStateAction<IValidator[] | null>>,
-  chain: IChain,
+  currentChain: IChain,
   isCurrentSetActive: boolean
 }
 

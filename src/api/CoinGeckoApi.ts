@@ -21,6 +21,4 @@ class CoinGeckoApi {
 
 }
 
-const coinGecko = new CoinGeckoApi('https://api.coingecko.com/api/v3');
-
-export default coinGecko;
+export default CoinGeckoApi;

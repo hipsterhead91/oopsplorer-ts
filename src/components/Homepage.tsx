@@ -4,7 +4,7 @@ function Homepage() {
     <section className="homepage">
       <h1 className="homepage__heading">Hello,</h1>
       <p className="homepage__paragraph">And welcome to <span className="homepage__bold"><span>Oops!</span>plorer</span>.</p>
-      <p className="homepage__paragraph">This humble app is designed to browse blockchains built on <a className="homepage__link" href="https://v1.cosmos.network/sdk" target="_blank">Cosmos SDK</a>; also, it's a training project where I'm learning to JavaScript, React and some other technologies, so please don't be too hard on it.</p>
+      <p className="homepage__paragraph">This humble app is designed to browse blockchains built on <a className="homepage__link" href="https://v1.cosmos.network/sdk" target="_blank">Cosmos SDK</a>; also, it's a pet project where I'm training to JavaScript, TypeScript, React (with it's Router) and some other technologies, so please don't be too hard on it.</p>
       <p className="homepage__paragraph">To start exploring, just <span className="homepage__bold">select a chain in the top right corner of your screen</span>.</p>
       <p className="homepage__paragraph">Now, a bit of information about this app:</p>
       <ul className="homepage__list">

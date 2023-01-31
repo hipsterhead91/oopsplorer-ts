@@ -1,15 +1,23 @@
-import React, { useState, useEffect } from "react";
-import { Outlet, useOutletContext, Link, useNavigate } from "react-router-dom";
+// Пакеты
+import { useState, useEffect, useContext } from "react";
+import { Outlet, Link, useNavigate } from "react-router-dom";
+
+// Контексты
+import AppComponentContext from "../contexts/AppComponentContext";
+import ChainComponentContext from "../contexts/ChainComponentContext";
+
+// Мой код
 import CosmosRestApi from "../api/CosmosRestApi";
-import CoinsContext from "../contexts/CoinsContext";
 import { cutDecimals, cutExtra, tweakPrice, filterActive, getPath } from "../utils/formatting";
+
+
 
 function Chain(props) {
 
-  const coins = React.useContext(CoinsContext);
-  const chain = props.chain;
-  const chainApi = new CosmosRestApi(chain.api[0]);
-  const [setCurrentChain] = useOutletContext();
+  const coins = useContext(AppComponentContext).coins;
+  const currentChain = props.chain;
+  const setCurrentChain = useContext(AppComponentContext).setCurrentChain;
+  const chainApi = new CosmosRestApi(currentChain.api[0]);
   const [activeSetLength, setActiveSetLength] = useState(null);
   const [wholeSetLength, setWholeSetLength] = useState(null);
   const [totalBonded, setTotalBonded] = useState(null); // получается один раз для расчёта voting power валидаторов и больше не меняется
@@ -26,19 +34,19 @@ function Chain(props) {
   // Примечание: нужно для корректного отображения сети в выпадающем меню хедера в том случае, когда переход
   // на страницу сети осуществлён не "пошагово" с главной, а вводом полного пути в адресную строку браузера.
   useEffect(() => {
-    setCurrentChain(chain);
+    setCurrentChain(currentChain);
   }, [])
-
+  
   // РЕДИРЕКТ НА ВАЛИДАТОРОВ
   // Примечание: при переходе по адресу типа site/chain делает редирект на site/chain/validators, поскольку 
   // страница только с компонентом chain выглядит полупустой.
   useEffect(() => {
-    const path = getPath(chain);
+    const path = getPath(currentChain);
     const currentUrl = window.location.href;
     if (currentUrl.endsWith(path) || currentUrl.endsWith(`${path}/`)) {
       navigate(`/${path}/validators`);
     }
-  }, [chain])
+  }, [currentChain])
 
   // ПОЛУЧАЕМ КОЛИЧЕСТВО ВАЛИДАТОРОВ
   useEffect(() => {
@@ -49,24 +57,24 @@ function Chain(props) {
         setActiveSetLength(active);
         setWholeSetLength(total);
       })
-      .catch(error => {
+      .catch(() => {
         setActiveSetLength(null);
         setWholeSetLength(null);
       })
-  }, [chain])
+  }, [currentChain])
 
   // ПОЛУЧАЕМ СУММУ ВСЕХ ЗАСТЕЙКАННЫХ МОНЕТ (единоразово, для расчёта voting power валидаторов)
   useEffect(() => {
     chainApi.getBondedTokens()
       .then(result => setTotalBonded(result))
-      .catch(error => setTotalBonded(null))
-  }, [chain])
+      .catch(() => setTotalBonded(null))
+  }, [currentChain])
 
   // ПОЛУЧАЕМ СУММУ ВСЕХ ЗАСТЕЙКАННЫХ МОНЕТ (для обновления по таймеру)
   const setCurrentTotalBonded = () => {
     chainApi.getBondedTokens()
       .then(result => setTotalBondedUpdating(result))
-      .catch(error => setTotalBondedUpdating(null))
+      .catch(() => setTotalBondedUpdating(null))
   }
 
   // ПОЛУЧАЕМ ВРЕМЯ АНБОНДА
@@ -79,8 +87,8 @@ function Chain(props) {
         const days = hours / 24;
         setUnbondingTime(days);
       })
-      .catch(error => setUnbondingTime(null))
-  }, [chain])
+      .catch(() => setUnbondingTime(null))
+  }, [currentChain])
 
   // ПОЛУЧАЕМ ВСЕ ГОЛОСОВАНИЯ
   useEffect(() => {
@@ -89,44 +97,44 @@ function Chain(props) {
         const active = result.proposals.filter(p => p.status === 'PROPOSAL_STATUS_VOTING_PERIOD');
         setActiveProposals(active);
       })
-      .catch(error => setActiveProposals(null))
-  }, [chain])
+      .catch(() => setActiveProposals(null))
+  }, [currentChain])
 
   // ПОЛУЧАЕМ ПОСЛЕДНИЙ БЛОК
   const setLatestBlock = () => {
     chainApi.getLatestBlock()
       .then(result => setBlockHeight(result.block.last_commit.height))
-      .catch(error => setBlockHeight(null))
+      .catch(() => setBlockHeight(null))
   };
 
   // ПОЛУЧАЕМ ИНФЛЯЦИЮ
   useEffect(() => {
     chainApi.getInflation()
       .then(result => setInflation(result.inflation))
-      .catch(error => setInflation(null))
-  }, [chain])
+      .catch(() => setInflation(null))
+  }, [currentChain])
 
   // ПОЛУЧАЕМ ПУЛ СООБЩЕСТВА
   useEffect(() => {
     chainApi.getCommunityPool()
       .then(result => {
-        const pool = result.pool.find(el => el.denom === chain.denom);
+        const pool = result.pool.find(el => el.denom === currentChain.denom);
         const amount = pool.amount;
         const cutted = cutExtra(amount, 19); // точка + 18 символов
         setCommunityPool(cutted);
       })
-      .catch(error => setCommunityPool(null))
-  }, [chain])
+      .catch(() => setCommunityPool(null))
+  }, [currentChain])
 
   // ПОЛУЧАЕМ ЦЕНУ ТОКЕНА
   useEffect(() => {
-    if (coins && chain.coinGecko) {
-      const currentCoin = coins.find(coin => coin.id === chain.coinGecko);
+    if (coins && currentChain.coinGecko) {
+      const currentCoin = coins.find(coin => coin.id === currentChain.coinGecko);
       setPrice(currentCoin.current_price);
     } else {
       setPrice(null);
     }
-  }, [coins, chain])
+  }, [coins, currentChain])
 
   // ОБНОВЛЯЕМ ДАННЫЕ ПО ТАЙМЕРУ
   // Примечание: return в конце хука необходим для того, чтобы выполнить некий код при размонтировании компонента.
@@ -143,26 +151,26 @@ function Chain(props) {
       clearTimeout(latestBlockTimer);
       clearTimeout(currentTotalBondedTimer);
     };
-  }, [chain])
+  }, [currentChain])
 
   // РЕНДЕР ОСНОВНОЙ ИНФОРМАЦИИ О СЕТИ
-  const heading = chain.isMain ? chain.name : `${chain.name} Testnet`;
-  const subheading = `${chain.isMain ? 'mainnet' : 'testnet'} · ${chain.chain}`;
-  const description = chain.description;
+  const heading = currentChain.isMain ? currentChain.name : `${currentChain.name} Testnet`;
+  const subheading = `${currentChain.isMain ? 'mainnet' : 'testnet'} · ${currentChain.chain}`;
+  const description = currentChain.description;
   const errorEl = <span className="chain__plate-error"><span>Oops!</span><br />something<br />went wrong</span>;
 
   // РЕНДЕР ЗАСТЕЙКАННЫХ ТОКЕНОВ
   let totalBondedEl = errorEl;
   if (totalBondedUpdating) {
-    const value = Number(cutDecimals(totalBondedUpdating, chain.decimals)).toLocaleString('en');
-    totalBondedEl = <span className="chain__plate-tokens">{value}<span>{chain.symbol}</span></span>;
+    const value = Number(cutDecimals(totalBondedUpdating, currentChain.decimals)).toLocaleString('en');
+    totalBondedEl = <span className="chain__plate-tokens">{value}<span>{currentChain.symbol}</span></span>;
   }
 
   // РЕНДЕР ПУЛА СООБЩЕСТВА
   let communityPoolEl = errorEl;
   if (communityPool) {
-    const value = Number(cutDecimals(communityPool, chain.decimals)).toLocaleString('en');
-    communityPoolEl = <span className="chain__plate-tokens">{value}<span>{chain.symbol}</span></span>;
+    const value = Number(cutDecimals(communityPool, currentChain.decimals)).toLocaleString('en');
+    communityPoolEl = <span className="chain__plate-tokens">{value}<span>{currentChain.symbol}</span></span>;
   }
 
   // РЕНДЕР ГОЛОСОВАНИЙ
@@ -175,7 +183,7 @@ function Chain(props) {
   }
 
   // РЕНДЕР ЛОГОТИПА
-  const logo = chain.logo;
+  const logo = currentChain.logo;
 
   // РЕНДЕР ВЫСОТЫ БЛОКА
   let blockHeightEl = errorEl;
@@ -208,78 +216,80 @@ function Chain(props) {
   let priceEl = errorEl;
   if (price) {
     const value = '$' + tweakPrice(price);
-    priceEl = <a href={`https://www.coingecko.com/en/coins/${chain.coinGecko}`} target="_blank" className="chain__plate-link">{value}</a>;
+    priceEl = <a href={`https://www.coingecko.com/en/coins/${currentChain.coinGecko}`} target="_blank" className="chain__plate-link">{value}</a>;
   }
 
   return (
-    <section className="chain">
-      <div className="chain__plates">
+    <ChainComponentContext.Provider value={{ chainApi, totalBonded, activeProposals }}>
+      <section className="chain">
+        <div className="chain__plates">
 
-        {/* ОПИСАНИЕ */}
-        <div id="description-plate" className="chain__plate">
-          <h1 className="chain__heading">{heading}</h1>
-          <span className="chain__subheading">{subheading}</span>
-          <p className="chain__description">{description}</p>
+          {/* ОПИСАНИЕ */}
+          <div id="description-plate" className="chain__plate">
+            <h1 className="chain__heading">{heading}</h1>
+            <span className="chain__subheading">{subheading}</span>
+            <p className="chain__description">{description}</p>
+          </div>
+
+          {/* ЗАСТЕЙКАНО */}
+          <div id="bonded-plate" className="chain__plate">
+            <span className="chain__plate-heading">Tokens Bonded:</span>
+            {totalBondedEl}
+          </div>
+
+          {/* ПУЛ СООБЩЕСТВА */}
+          <div id="community-plate" className="chain__plate">
+            <span className="chain__plate-heading">Community Pool:</span>
+            {communityPoolEl}
+          </div>
+
+          {/* ГОЛОСОВАНИЯ */}
+          <div id="proposals-plate" className="chain__plate">
+            <span className="chain__plate-heading">Active Proposals:</span>
+            {proposalsEl}
+          </div>
+
+          {/* ЛОГО */}
+          <div id="logo-plate" className="chain__plate">
+            <div style={{ backgroundImage: `url(${logo})` }} className="chain__plate-logo" />
+          </div>
+
+          {/* ВЫСОТА БЛОКА */}
+          <div id="block-plate" className="chain__plate">
+            <span className="chain__plate-heading">Block Height:</span>
+            {blockHeightEl}
+          </div>
+
+          {/* ВАЛИДАТОРЫ */}
+          <div id="validators-plate" className="chain__plate">
+            <span className="chain__plate-heading">Validators:</span>
+            {validatorsEl}
+          </div>
+
+          {/* ИНФЛЯЦИЯ */}
+          <div id="inflation-plate" className="chain__plate">
+            <span className="chain__plate-heading">Inflation:</span>
+            {inflationEl}
+          </div>
+
+          {/* СРОКИ АНБОНДА */}
+          <div id="unbonding-plate" className="chain__plate">
+            <span className="chain__plate-heading">Unbonding:</span>
+            {unbondingEl}
+          </div>
+
+          {/* ЦЕНА */}
+          <div id="price-plate" className="chain__plate">
+            <span className="chain__plate-heading">Price by CoinGecko:</span>
+            {priceEl}
+          </div>
+
         </div>
 
-        {/* ЗАСТЕЙКАНО */}
-        <div id="bonded-plate" className="chain__plate">
-          <span className="chain__plate-heading">Tokens Bonded:</span>
-          {totalBondedEl}
-        </div>
+        <Outlet />
 
-        {/* ПУЛ СООБЩЕСТВА */}
-        <div id="community-plate" className="chain__plate">
-          <span className="chain__plate-heading">Community Pool:</span>
-          {communityPoolEl}
-        </div>
-
-        {/* ГОЛОСОВАНИЯ */}
-        <div id="proposals-plate" className="chain__plate">
-          <span className="chain__plate-heading">Active Proposals:</span>
-          {proposalsEl}
-        </div>
-
-        {/* ЛОГО */}
-        <div id="logo-plate" className="chain__plate">
-          <div style={{ backgroundImage: `url(${logo})` }} className="chain__plate-logo" />
-        </div>
-
-        {/* ВЫСОТА БЛОКА */}
-        <div id="block-plate" className="chain__plate">
-          <span className="chain__plate-heading">Block Height:</span>
-          {blockHeightEl}
-        </div>
-
-        {/* ВАЛИДАТОРЫ */}
-        <div id="validators-plate" className="chain__plate">
-          <span className="chain__plate-heading">Validators:</span>
-          {validatorsEl}
-        </div>
-
-        {/* ИНФЛЯЦИЯ */}
-        <div id="inflation-plate" className="chain__plate">
-          <span className="chain__plate-heading">Inflation:</span>
-          {inflationEl}
-        </div>
-
-        {/* СРОКИ АНБОНДА */}
-        <div id="unbonding-plate" className="chain__plate">
-          <span className="chain__plate-heading">Unbonding:</span>
-          {unbondingEl}
-        </div>
-
-        {/* ЦЕНА */}
-        <div id="price-plate" className="chain__plate">
-          <span className="chain__plate-heading">Price by CoinGecko:</span>
-          {priceEl}
-        </div>
-
-      </div>
-
-      <Outlet context={[chain, chainApi, totalBonded, activeProposals]} />
-
-    </section>
+      </section>
+    </ChainComponentContext.Provider>
   )
 }
 
